@@ -76,6 +76,15 @@ function initSpeech() {
             if(activeField === 'produto') autoPreencherUnidade(); 
             activeField = null;
         };
+        // FIX: Se o microfone travar ou negar permissão, reseta o sistema
+        recognition.onerror = function(event) {
+            isRecording = false;
+            document.getElementById('btn-mic-prod').classList.remove('ouvindo');
+            document.getElementById('btn-mic-busca').classList.remove('ouvindo');
+            document.getElementById('novoProduto').placeholder = "Item";
+            document.getElementById('filtroBusca').placeholder = "🔍 Buscar...";
+            activeField = null;
+        };
         recognition.onresult = function(event) {
             let transcript = '';
             for (let i = event.resultIndex; i < event.results.length; i++) { transcript += event.results[i][0].transcript; }
@@ -86,20 +95,29 @@ function initSpeech() {
     }
 }
 
-function toggleMic(campo, event) { if(event) event.stopPropagation(); darFeedback(); if (!recognition) { mostrarToast("Navegador sem suporte."); return; } if (isRecording) { recognition.stop(); } else { activeField = campo; try { recognition.start(); } catch (e) { recognition.stop(); } } }
+function toggleMic(campo, event) { 
+    if(event) event.stopPropagation(); 
+    darFeedback(); 
+    if (!recognition) { mostrarToast("Navegador sem suporte."); return; } 
+    if (isRecording) { recognition.stop(); } 
+    else { 
+        activeField = campo; 
+        try { recognition.start(); } catch (e) { recognition.stop(); isRecording = false; } 
+    } 
+}
 
 window.addEventListener('load', initSpeech);
 
 function toggleSearch(event) {
     if (event) event.stopPropagation(); darFeedback();
     const overlay = document.getElementById('search-overlay'); const btn = document.getElementById('assistive-touch');
-    if (overlay.style.display === 'block') { overlay.style.display = 'none'; btn.style.opacity = '0.95'; } 
+    if (overlay.style.display === 'block') { overlay.style.display = 'none'; btn.style.opacity = '0.9'; } 
     else { overlay.style.display = 'block'; overlay.style.top = (window.scrollY + 15) + 'px'; btn.style.opacity = '0'; document.getElementById('filtroBusca').focus(); }
 }
 document.addEventListener('click', function(event) { const overlay = document.getElementById('search-overlay'); const btn = document.getElementById('assistive-touch'); if ((!overlay.contains(event.target) && !btn.contains(event.target)) && overlay.style.display === 'block') { toggleSearch(null); } });
 window.addEventListener('scroll', function() { var overlay = document.getElementById('search-overlay'); if (overlay.style.display === 'block') { overlay.style.top = (window.scrollY + 15) + 'px'; } });
 
-// --- FIX V5.1: TOQUE LONGO SEGURO (NÃO BLOQUEIA TECLADO) ---
+// --- FIX: MICROFONE NA LUPA BURLANDO BLOQUEIO DA APPLE ---
 let pressTimer;
 let isLongPress = false;
 const btnLupa = document.getElementById('assistive-touch');
@@ -111,20 +129,26 @@ btnLupa.addEventListener('touchstart', (e) => {
         darFeedback();
         const overlay = document.getElementById('search-overlay');
         if (overlay.style.display !== 'block') { toggleSearch(null); }
-        if (!isRecording) { toggleMic('busca', null); }
     }, 600); 
 }, {passive: true});
 
 btnLupa.addEventListener('touchend', (e) => {
     if (pressTimer) { clearTimeout(pressTimer); pressTimer = null; }
+    if (isLongPress) {
+        e.preventDefault(); 
+        if (!isRecording) { toggleMic('busca', null); } // O iOS só libera o Mic no TouchEnd
+    }
 });
 
 btnLupa.addEventListener('click', (e) => {
     e.preventDefault();
-    if (isLongPress) return; // Ignora clique fantasma do Safari se já ativou voz
-    toggleSearch(e); // Aciona o toque rápido nativo
+    if (isLongPress) {
+        isLongPress = false;
+        return; 
+    }
+    toggleSearch(e); 
 });
-// ------------------------------------------------------------
+// --------------------------------------------------------
 
 let swipeStartX = 0, swipeStartY = 0, swipeCurrentX = 0;
 let isSwiping = false, swipedRow = null, justSwiped = false;
@@ -246,7 +270,6 @@ function copiarEstoque() { copiarParaClipboard(gerarTextoEstoque()); } function 
 function copiarParaClipboard(texto) { darFeedback(); if (navigator.clipboard && window.isSecureContext) { navigator.clipboard.writeText(texto).then(() => mostrarToast("Copiado com sucesso! ✅")).catch(() => copiarFallback(texto)); } else { copiarFallback(texto); } }
 function copiarFallback(texto) { var textArea = document.createElement("textarea"); textArea.value = texto; textArea.style.position = "fixed"; textArea.style.left = "-9999px"; document.body.appendChild(textArea); textArea.focus(); textArea.select(); try { document.execCommand('copy'); mostrarToast("Copiado com sucesso! ✅"); } catch (err) { mostrarAlertaElegante("Erro ao copiar."); } document.body.removeChild(textArea); }
 
-// --- FIX V5.1: TRAVA DE SEGURANÇA PARA NÃO APAGAR A LISTA PADRÃO ---
 function adicionarManual(salvarNoPadrao) { 
     var p = document.getElementById("novoProduto").value.trim(); 
     var q = document.getElementById("novoQtd").value.trim(); 
@@ -255,7 +278,7 @@ function adicionarManual(salvarNoPadrao) {
     if (!p) { mostrarToast("⚠️ Digite o nome do produto!"); return; } 
     darFeedback(); 
     
-    salvarDados(); // FIX: Salva a tela atual ANTES de injetar, preservando a lista padrão
+    salvarDados();
     
     var dados = JSON.parse(localStorage.getItem(storageKey) || "[]"); 
     
@@ -279,7 +302,6 @@ function adicionarManual(salvarNoPadrao) {
     document.getElementById("novoProduto").value = ""; 
     document.getElementById("novoQtd").value = ""; 
 }
-// ------------------------------------------------------------------
 
 function removerDoPadrao() { var p = document.getElementById("novoProduto").value.trim(); if (!p) { mostrarToast("⚠️ Digite o nome para remover!"); return; } darFeedback(); var favoritosUsuario = JSON.parse(localStorage.getItem(storageMeus) || "[]"); var novaListaFavoritos = favoritosUsuario.filter(item => item.n.toLowerCase() !== p.toLowerCase()); localStorage.setItem(storageMeus, JSON.stringify(novaListaFavoritos)); var ocultosSistema = JSON.parse(localStorage.getItem(storageOcultos) || "[]"); if (!ocultosSistema.includes(p.toLowerCase())) { ocultosSistema.push(p.toLowerCase()); localStorage.setItem(storageOcultos, JSON.stringify(ocultosSistema)); } document.querySelectorAll("#lista-itens-container tr:not(.categoria-header-row)").forEach(r => { var nomeTabela = r.querySelector(".nome-prod").innerText.toLowerCase(); if(nomeTabela === p.toLowerCase()) { r.remove(); } }); salvarDados(); atualizarDropdown(); document.getElementById("novoProduto").value = ""; document.getElementById("novoQtd").value = ""; }
 
