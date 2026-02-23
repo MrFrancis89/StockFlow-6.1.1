@@ -407,6 +407,41 @@ body.light-mode #calc-display { color: #333; box-shadow: inset 0 2px 5px rgba(0,
     transform: scale(0.96);
 }
 
+/* Ícone para retornar à calculadora dentro do campo de quantidade */
+.input-com-calc {
+    position: relative;
+    display: inline-block;
+    width: 100%;
+}
+.btn-calc-revert {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    cursor: pointer;
+    z-index: 5;
+    color: var(--accent);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    transition: all 0.2s;
+}
+.btn-calc-revert:active {
+    transform: translateY(-50%) scale(0.9);
+    opacity: 0.8;
+}
+.input-qtd-tabela.modo-teclado,
+#novoQtd.modo-teclado {
+    padding-right: 35px;
+}
+
 /* Ícone de alerta original removido, mas mantido oculto por segurança */
 .alerta-icon {
     display: none;
