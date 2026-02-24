@@ -2,6 +2,7 @@
 import { darFeedback } from './utils.js';
 import { salvarDados } from './storage.js';
 import { coletarDadosDaTabela } from './ui.js';
+import { atualizarPainelCompras } from './compras.js';
 
 export function alternarCheck(box) {
     darFeedback();
@@ -14,6 +15,7 @@ export function alternarCheck(box) {
     }
     const dados = coletarDadosDaTabela();
     salvarDados(dados);
+    atualizarPainelCompras(); // <-- Atualiza a lista de compras
 }
 
 export function alternarTodos(masterBox) {
@@ -32,4 +34,5 @@ export function alternarTodos(masterBox) {
     });
     const dados = coletarDadosDaTabela();
     salvarDados(dados);
+    atualizarPainelCompras(); // <-- Atualiza a lista de compras
 }
