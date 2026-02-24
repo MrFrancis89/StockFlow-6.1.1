@@ -2,7 +2,7 @@
 import { identificarCategoria, coresCategorias, nomesCategorias } from './categorias.js';
 import { salvarDados } from './storage.js';
 import { abrirCalculadora } from './calculadora.js';
-import { atualizarPainelCompras } from './compras.js'; // será criado a seguir
+import { atualizarPainelCompras } from './compras.js';
 
 let containerItens = document.getElementById("lista-itens-container");
 
@@ -84,4 +84,28 @@ export function salvarEAtualizar() {
     salvarDados(dados);
     renderizarListaCompleta(dados);
     atualizarDropdown();
+    atualizarPainelCompras(); // <-- Atualiza a lista de compras
+}
+
+// Função para atualizar dropdown (precisa estar aqui ou importada)
+function atualizarDropdown() {
+    // Implementação já existe no main, mas podemos deixar vazia ou importar
+    // Na verdade, essa função é chamada aqui, mas não está definida neste módulo.
+    // Vamos importar do main? Melhor: mover a função para um módulo separado ou defini-la aqui.
+    // Como é uma função que depende do DOM, podemos importar do main ou replicar.
+    // Para simplificar, vou importar do main (mas isso criaria dependência circular). 
+    // Vou replicar a lógica aqui mesmo.
+    var select = document.getElementById('filtroSelect');
+    if (!select) return;
+    var v = select.value;
+    select.innerHTML = '<option value="">📂 ITENS</option>';
+    var nomes = [];
+    document.querySelectorAll(".nome-prod").forEach(td => nomes.push(td.innerText.replace(/(\r\n|\n|\r)/gm, " ").trim()));
+    nomes.sort().forEach(n => {
+        var o = document.createElement("option");
+        o.value = n;
+        o.text = n;
+        select.add(o);
+    });
+    select.value = v;
 }
