@@ -5,17 +5,20 @@ Todas as alterações notáveis neste projeto serão documentadas neste arquivo.
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/),
 e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
+## [6.1.1] - 2025-04-08
+
+### Corrigido
+- **Microfone no duplo toque da lupa**: Agora o microfone é ativado corretamente ao dar duplo toque na lupa. Ajustes no temporizador garantem que o overlay de busca abra antes da ativação do microfone.
+- Pequenas melhorias de estabilidade e confiabilidade no reconhecimento de voz.
+
+---
+
 ## [6.1.0] - 2025-04-08
 
 ### Adicionado
-- **Alternância entre calculadora e teclado nativo**: Na calculadora, um botão "⌨️ Usar teclado" permite sair para o teclado do dispositivo e digitar diretamente no campo de quantidade.
-- **Ícone de retorno à calculadora**: Quando em modo teclado, um ícone 🧮 aparece dentro do campo; clicando nele, o campo volta a ser readonly e a calculadora reabre.
-- **Parser avançado de frações**: Agora é possível digitar frações como `1/2`, `3/4`, `2 1/3` nos campos de quantidade (modo teclado). Ao sair do campo, a fração é convertida automaticamente para decimal (ex: `1/2` → `0,5`), garantindo compatibilidade com os alertas de estoque.
-- **Lupa flutuante corrigida**: Agora a lupa é arrastável novamente, e o duplo toque funciona conforme esperado (abre busca + microfone).
-
-### Corrigido
-- Problema na lupa que a deixava estática foi resolvido.
-- Dependências circulares e importações faltantes em `utils.js` foram ajustadas.
+- Alternância entre calculadora e teclado nativo nos campos de quantidade.
+- Ícone de retorno à calculadora (🧮) dentro do campo quando em modo teclado.
+- Parser avançado de frações (ex: `1/2`, `2 1/3` → decimal).
 
 ---
 
